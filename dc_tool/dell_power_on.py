@@ -1,4 +1,5 @@
 ###
+### Power on/off Dell Server via Idrac
 ### porting from GetSetPowerStateREDFISH.py
 ###
 
