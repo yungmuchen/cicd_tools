@@ -1,0 +1,471 @@
+---
+- name: Install the package for SimPC with Ubuntu 18.04
+  hosts: SimPC
+
+  tasks:
+
+    - name: Sync apt key | Add repo public key
+      shell: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FCEF32E745F2C3D5
+            
+    - name: Install SimPC | ubuntu packets (apt-get install)
+      apt:
+        update_cache: yes
+        pkg:
+        - libssl-dev 
+        - openssl
+        - ssh 
+        - telnetd
+        - python-dev 
+        - python-setuptools 
+        - python-pip
+        - coreutils
+        - uml-utilities
+        - bridge-utils 
+        - autoconf 
+        - automake 
+        - xz-utils
+        - libxml2 
+        - libxml2-dev 
+        - libxslt-dev 
+        - libxslt1-dev 
+        - libffi-dev
+        - vlan 
+        - rpm2cpio 
+        - ncftp 
+        - wget 
+        - curl 
+        - gcc 
+        - g++
+        - libc6-dev 
+        - libtool 
+        - libncurses5-dev 
+        - libncurses5
+        - libc-ares-dev 
+        - libmysqlclient-dev
+        - xz-utils 
+        - bison 
+        - byacc 
+        - flex 
+        - liblzo2-dev 
+        - liblzo2-2 
+        - libnet1
+        - libnet1-dev
+        - python-lxml
+        - python-yaml
+        - python-pypdf2
+        - python-beautifulsoup
+        - python-serial
+        - gawk 
+        - joe 
+        - openjdk-11-jdk 
+        - openjdk-8-jdk 
+        - ntpdate 
+        - ntp
+        - ncftp 
+        - vim 
+        - socat 
+        - tcpreplay 
+        - tcpdump
+        - nmap
+        - ipmitool
+        - vsftpd
+#        - tshark
+#        - putty
+#        - vim-gnome 
+#        - wireshark
+#        - chromium-browser
+
+    - name: Install SimPC | python packets (pip install)
+      pip: 
+        name: 
+          - pip
+          - setuptools
+          - distribute
+          - six 
+          - poster 
+          - docopt 
+          - PyYAML 
+          - jinja2
+          - colored 
+          - inflection 
+          - httpretty 
+          - selenium 
+          - lxml 
+          - netaddr 
+          - pycassa 
+          - httplib2 
+          - termcolor 
+          - decorator 
+          - pysphere 
+          - pyvmomi 
+          - pyVim 
+          - certifi 
+          - urllib3 
+          - Cython 
+          - pypdf 
+          - numpy 
+          - pandas 
+          - python-docx 
+          - requests
+          - jenkins
+          - python-jenkins
+          - django==1.4
+          - cryptography==2.1.4 
+          - paramiko==2.0.2 
+          - robotframework-selenium2library 
+          - robotframework-seleniumlibrary 
+          - robotframework-ftplibrary 
+          - robotframework-extendedrequestslibrary 
+          - robotframework-debuglibrary 
+          - robotframework-requests
+          - robotframework-sshlibrary==2.1.2
+          - robotframework-httplibrary
+          - robotframework==2.8.7
+          - scapy
+          - nose
+          - mock
+
+
+    ###### remove packages
+
+    - name: Remove "snapd" package
+      apt:
+        name: snapd
+        state: absent
+        purge: yes
+
+
+    ###### force apt command to use IPv4 first
+
+    - name: Install SimPC | config /etc/gai.conf
+      replace:
+        path: /etc/gai.conf
+        regexp: '^precedence ::ffff:0:0/96  100'
+        replace: '#precedence ::ffff:0:0/96  100'
+
+
+    ######  disable auto-clean /tmp/
+
+    - name: Install SimPC | config /etc/systemd/logind.conf
+      replace:
+        path: /etc/systemd/logind.conf
+        regexp: '^#RemoveIPC=yes'
+        replace: 'RemoveIPC=no'
+
+
+    - name: Install SimPC | config /etc/systemd/logind.conf
+      replace:
+        path: /etc/systemd/logind.conf
+        regexp: '^RemoveIPC=yes'
+        replace: 'RemoveIPC=no'
+
+
+    ######  config /etc/profile
+
+    - name: Clean up /etc/profile
+      lineinfile:
+        path: /etc/profile
+        state: absent
+        regexp: 'ulimit -SHn 512000'
+
+    - name: install SimPC | add ulimit -SHn 512000 in /etc/profile
+      shell: echo 'ulimit -SHn 512000' >>/etc/profile
+
+    - name: Clean up /etc/profile
+      lineinfile:
+        path: /etc/profile
+        state: absent
+        regexp: 'ulimit -u unlimited >/dev/null 2>&1'
+
+    - name: install SimPC | add ulimit -u unlimited in /etc/profile
+      shell: echo 'ulimit -u unlimited >/dev/null 2>&1' >>/etc/profile
+
+
+    ######  config /etc/security/limits.conf
+
+    - name: Add or modify hard nofile limits to 512000 for wildcard domain in /etc/security/limits.conf      
+      pam_limits:
+        domain: '*'
+        limit_type: hard
+        limit_item: nofile
+        value: 512000
+
+    - name: Add or modify soft nofile limits to 512000 for wildcard domain in /etc/security/limits.conf
+      pam_limits:
+        domain: '*'
+        limit_type: soft
+        limit_item: nofile
+        value: 512000
+
+    - name: Add or modify hard nofile limits to 512000 for root in /etc/security/limits.conf
+      pam_limits:
+        domain: root
+        limit_type: hard
+        limit_item: nofile
+        value: 512000
+
+    - name: Add or modify soft nofile limits to 512000 for root in /etc/security/limits.conf
+      pam_limits:
+        domain: root
+        limit_type: soft
+        limit_item: nofile
+        value: 512000
+
+
+    ###### config /etc/rc.local
+
+    - stat:
+        path: /etc/systemd/system/rc-local.service
+      register: p
+
+    - debug:
+        msg: "/etc/systemd/system/rc-local.service does not exist, create it"
+      when: p.stat.exists == False
+
+    - name: Insert rc.local service systemd configuration
+      blockinfile:
+        path: /etc/systemd/system/rc-local.service
+        create: yes
+        block: |
+          [Unit]
+          Description=/etc/rc.local Compatibility
+          ConditionPathExists=/etc/rc.local
+          [Service]
+          Type=forking
+          ExecStart=/etc/rc.local start
+          TimeoutSec=0
+          StandardOutput=tty
+          RemainAfterExit=yes
+          SysVStartPriority=99
+          [Install]
+          WantedBy=multi-user.target
+
+    - stat:
+        path: /etc/rc.local
+      register: p2
+
+    - name: Create /etc/rc.local
+      blockinfile:
+        path: /etc/rc.local
+        create: yes
+        mode: u=rwx,g=rx,o=rx
+        block: |
+          #!/bin/bash
+          exit 0
+      when: p2.stat.exists == False
+
+    - name: Clean up /etc/rc.local
+      lineinfile:
+        path: /etc/rc.local
+        state: absent
+        regexp: '\#.* ANSIBLE MANAGED BLOCK'
+      when: p2.stat.exists == False
+
+    - name: Restart rc.local
+      systemd:
+        state: restarted
+        name: rc-local
+
+
+    ###### config /etc/pam.d/common-session
+
+    - name: Insert pam_limits.so rule after an existing rule pam_systemd.so in /etc/pam.d/common-session
+      pamd:
+        name: common-session
+        type: session
+        control: optional       
+        module_path: pam_systemd.so
+        new_type: session
+        new_control: required
+        new_module_path: pam_limits.so
+        state: after
+
+    ###### config /etc/sysctl.conf
+
+    - name: config vm.swappiness=10 in /etc/sysctl.conf
+      sysctl:
+        name: vm.swappiness
+        value: '10'
+        state: present
+        reload: yes
+
+    - name: config kernel.core_uses_pid=1 in /etc/sysctl.conf
+      sysctl:
+        name: kernel.core_uses_pid
+        value: '1'
+        state: present
+        reload: yes
+
+    - name: config kernel.core_pattern in /etc/sysctl.conf
+      sysctl:
+        name: kernel.core_pattern 
+        value: '/tmp/core-%e-%s-%u-%g-%p-%t'
+        state: present
+        reload: yes
+
+    - name: config fs.suid_dumpable=2 in /etc/sysctl.conf
+      sysctl:
+        name: fs.suid_dumpable
+        value: '2'
+        state: present
+        reload: yes
+
+    - name: config net.core.rmem_max in /etc/sysctl.conf
+      sysctl:
+        name: net.core.rmem_max
+        value: '16777216'
+        state: present
+        reload: yes
+
+    - name: config net.core.wmem_max in /etc/sysctl.conf
+      sysctl:
+        name: net.core.wmem_max
+        value: '16777216'
+        state: present
+        reload: yes
+
+    - name: config net.ipv4.tcp_rmem in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv4.tcp_rmem
+        value: '4096 87380 16777216'
+        state: present
+        reload: yes
+
+    - name: config net.ipv4.tcp_wmem in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv4.tcp_wmem
+        value: '4096 87380 16777216'
+        state: present
+        reload: yes
+
+    - name: config net.core.netdev_max_backlog in /etc/sysctl.conf
+      sysctl:
+        name: net.core.netdev_max_backlog
+        value: '500000'
+        state: present
+        reload: yes
+
+    - name: config net.ipv4.tcp_tw_reuse in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv4.tcp_tw_reuse
+        value: '1'
+        state: present
+        reload: yes
+
+    - name: config net.ipv4.ip_local_port_range in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv4.ip_local_port_range
+        value: '45000 65000'
+        state: present
+        reload: yes
+
+    - name: config net.ipv6.conf.all.accept_ra=0 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv6.conf.all.accept_ra
+        value: '0'
+        state: present
+        reload: yes
+
+    - name: config net.ipv6.conf.default.accept_ra=0 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv6.conf.default.accept_ra
+        value: '0'
+        state: present
+        reload: yes
+
+    - name: config net.ipv6.conf.all.autoconf=0 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv6.conf.all.autoconf 
+        value: '0'
+        state: present
+        reload: yes
+
+    - name: config net.ipv6.conf.default.autoconf=0 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv6.conf.default.autoconf
+        value: '0'
+        state: present
+        reload: yes
+
+    - name: config net.ipv4.neigh.default.gc_thresh3 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv4.neigh.default.gc_thresh3
+        value: '11776'
+        state: present
+        reload: yes
+
+    - name: config net.ipv4.neigh.default.gc_thresh2 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv4.neigh.default.gc_thresh2
+        value: '11264'
+        state: present
+        reload: yes
+
+    - name: config net.ipv4.neigh.default.gc_thresh1 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv4.neigh.default.gc_thresh1
+        value: '10240'
+        state: present
+        reload: yes
+
+    - name: config net.ipv6.neigh.default.gc_thresh3 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv6.neigh.default.gc_thresh3
+        value: '11776'
+        state: present
+        reload: yes
+
+    - name: config net.ipv6.neigh.default.gc_thresh2 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv6.neigh.default.gc_thresh2
+        value: '11264'
+        state: present
+        reload: yes
+
+    - name: config net.ipv6.neigh.default.gc_thresh1 in /etc/sysctl.conf
+      sysctl:
+        name: net.ipv6.neigh.default.gc_thresh1
+        value: '10240'
+        state: present
+        reload: yes
+
+
+    ######  config /etc/hosts
+
+    - name: Add dns mappings to /etc/hosts
+      blockinfile:
+        path: /etc/hosts
+        block: |
+          {{ item.ip }} {{ item.name }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.name }}"
+      loop:
+        - { name: tdc-jenkins.video54.local, ip: 10.206.96.42 }
+        - { name: tdc-jenkins.arrs.arrisi.com, ip: 10.206.96.42 }
+        - { name: jenkins-tdc.video54.local, ip: 10.206.96.51 }
+        - { name: jenkins-tdc.arrs.arrisi.com, ip: 10.206.96.51 }
+        - { name: tdc-repository.arrisi.com, ip: 10.206.96.38 }
+        - { name: tdc-repository.arrs.arrisi.com, ip: 10.206.96.38 }
+        - { name: tdc-repository.video54.local, ip: 10.206.96.38 }
+        - { name: tdc-repos2.arrisi.com, ip: 10.206.96.74 }
+
+    ######  config /etc/ntp.conf
+
+    - name: Add ntp server to /etc/ntp.conf
+      blockinfile:
+        path: /etc/ntp.conf
+        insertafter: "# Specify one or more NTP servers."
+        block: |
+          server time.stdtime.gov.tw
+          server time.windows.com
+          server tw.pool.ntp.org
+          restrict 192.168.0.0 mask 255.255.0.0
+          restrict 10.111.0.0 mask 255.255.0.0
+          restrict 10.1.0.0 mask 255.255.0.0
+          restrict 10.206.0.0 mask 255.255.0.0
+
+    - name: Configure Linux | Set timezone to UTC
+      shell: echo "Etc/UTC" | sudo tee /etc/timezone
+
+    - name: Configure Linux | reload timezone setting
+      shell: dpkg-reconfigure --frontend noninteractive tzdata
+

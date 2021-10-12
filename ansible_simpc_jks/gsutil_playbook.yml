@@ -1,0 +1,34 @@
+---
+- name: Install google gsutil on ubuntu 18.04
+  hosts: Jenkins
+
+  tasks:
+
+    - name: sync ubuntu repo key
+      shell: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FCEF32E745F2C3D5
+
+    - name: install ubuntu packages
+      apt:
+        name: 
+        - ca-certificates 
+        - curl 
+        - apt-transport-https 
+        - lsb-release 
+        - gnupg
+        update_cache: yes
+
+    ######## 
+
+    - name: Install gsutil | add google pgp key 2
+      shell: curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg |sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+
+    - name: Install gsutil | create google cloud-sdk apt list
+      shell: |
+        echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" |
+        sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+
+    - name: install gsutil from google
+      apt:
+        name: 
+        - google-cloud-sdk
+        update_cache: yes

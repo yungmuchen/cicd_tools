@@ -1,0 +1,56 @@
+---
+- name: Install Jenkins and apache2 on ubuntu 18.04
+  hosts: Jenkins
+
+  tasks:
+
+#    - name: install jenkins | unhold jenkins version
+#      shell: apt-mark unhold jenkins
+
+    - name: install jenkins | add jenkins repo key
+      shell: apt-key adv --keyserver keyserver.ubuntu.com --recv-keys FCEF32E745F2C3D5
+
+    - name: install jenkins | download jenkins repo key from jenkins.io
+      get_url:
+        url: https://pkg.jenkins.io/debian/jenkins-ci.org.key
+        dest: /root/jenkins-ci.org.key
+
+    - name: install jenkins | add jenkins repo key
+      shell: apt-key add /root/jenkins-ci.org.key
+
+    - name: install jenkins | create jenkins apt list
+      shell: echo deb http://pkg.jenkins.io/debian-stable binary/ > /etc/apt/sources.list.d/jenkins.list
+
+    - name: install jenkins | sync apt repo list
+      apt:
+        update_cache: yes
+
+    - name: install jenkins | install jenkins 2.204.5
+      apt:
+        name: jenkins=2.204.5
+        update_cache: yes
+
+    - name: Config /etc/default/jenkins
+      replace:
+        path: /etc/default/jenkins
+        regexp: '^JAVA_ARGS="(.*)"'
+        replace: 'JAVA_ARGS="\1 -Dmail.smtp.starttls.enable=true -Dhudson.model.DirectoryBrowserSupport.CSP="'
+
+    - name: Restart jenkins
+      systemd:
+        state: restarted
+        name: jenkins
+
+    - name: install jenkins | hold jenkins version
+      shell: apt-mark hold jenkins
+
+    - name: install jenkins | install apache2
+      apt:
+        pkg:
+        - apache2
+
+    - name: Install jenkins | awscli packets (pip install)
+      pip:
+        name:
+          - awscli
+
