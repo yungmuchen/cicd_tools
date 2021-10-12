@@ -26,7 +26,7 @@ class ESXiCli():
         self.tcfg = dict(
             ip_addr='192.168.1.1',
             username='root',
-            password='lab4man1',
+            password='!asdfqwer',
             port=22,
         )
 
