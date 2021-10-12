@@ -1,3 +1,8 @@
+###
+### Power on all VM on ESXi servers
+### Power off all VM on ESXi servers and shutdown the ESXi server
+### Execution during power maintenance in the data center
+###
 from sshclient import sshclient
 import paramiko
 import re
