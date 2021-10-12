@@ -1,3 +1,6 @@
+###
+### Power on all kvm server and shutdown linux host.
+###
 from sshclient import sshclient
 import paramiko
 import re
