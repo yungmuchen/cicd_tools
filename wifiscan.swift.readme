@@ -1,0 +1,18 @@
+# macOS 10.15+
+
+# install xcode
+xcode-select --install
+
+# build tool
+swiftc wifiscan.swift -o wifiscan \
+  -framework CoreWLAN \
+  -framework Foundation
+
+# codesign
+codesign --force --deep --sign - ./wifiscan
+
+# scan on system default interface
+./wifiscan
+
+# scan on en1 interface
+./wifiscan en1
