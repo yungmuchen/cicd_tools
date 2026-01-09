@@ -1,0 +1,11 @@
+Step 1: Install Xcode Command Line Tools
+
+xcode-select --install
+
+
+Step 2: Compile the program
+
+swiftc \
+  -framework CoreWLAN \
+  wifitool-10-15.swift \
+  -o wifitool-15
