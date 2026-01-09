@@ -1,0 +1,17 @@
+wifitool.m is developed by object-C.
+
+Install Xcode Command Line Tools
+- xcode-select --install
+
+
+Compile the program
+1) build by xcode (GUI)
+
+2) build by cli
+clang -fobjc-arc \
+      -framework CoreWLAN \
+      -framework Foundation \
+      -framework Security \
+      -mmacosx-version-min=10.15 \
+      wifitool.m -o wifitool
+
