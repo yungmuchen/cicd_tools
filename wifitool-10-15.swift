@@ -1,6 +1,8 @@
 import Foundation
 import CoreWLAN
 // development env: macOS 10.15, Xcode 11.7
+// mac-mini (os 10.15) connect to a 8021x WLAN. Cert for radius server already approved before.
+// This program does not handle cert approvement pop-up windows.
 // MARK: - Usage
 
 func usageAndExit() -> Never {
