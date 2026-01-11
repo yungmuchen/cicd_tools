@@ -1,0 +1,11 @@
+The error you are seeing is a known bug in the macOS 12.1 SDK headers (specifically NSBundle.h). 
+The macro NS_FORMAT_ARGUMENT(1) is incorrectly applied to a method returning NSAttributedString *, 
+but the compiler expects it only on methods returning NSString *.
+
+clang -fobjc-arc \
+      -framework CoreWLAN \
+      -framework Foundation \
+      -framework Security \
+      -DNS_FORMAT_ARGUMENT\(A\)= \
+      wifitool.m -o wifitool
+
