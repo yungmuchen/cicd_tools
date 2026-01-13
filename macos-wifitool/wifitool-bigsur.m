@@ -3,7 +3,7 @@
 #import <Security/Security.h>
 
 /**
- * wifitool: Updated for macOS 11.0+ (Big Sur through Sonoma)
+ * wifitool: Updated for macOS 11.0+ (Big Sur through Ventura)
  * Modernizes CWInterface access and security protocol checks.
  */
 
