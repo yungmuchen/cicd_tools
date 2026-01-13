@@ -5,7 +5,7 @@
 /**
  * wifitool: A command-line utility to manage 802.1X Enterprise Wi-Fi connections.
  * Supports: connect, disconnect, scan
- * Targets: macOS 10.15+
+ * Targets: macOS 10.15 ~ 13. sw_vers < 14.
  */
  
 int main(int argc, const char * argv[]) {
