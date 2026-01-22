@@ -11,12 +11,6 @@ BuildVersion:		24F74
 -----------------
 Execution
 
-1) from .applescript
-
-  osascript foo.applescript
-
-2) from .scpt
-
   osascript bar.scpt
 
 -----------------
