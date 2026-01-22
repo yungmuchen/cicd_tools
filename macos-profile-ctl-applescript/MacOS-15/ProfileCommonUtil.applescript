@@ -25,7 +25,7 @@ on answer_password_to_SecurityAgent()
                                 -- Check if the dialog window is present
                                 if exists window 1 then
 
-                                        --                                      set my_MacMiniPassword to ProfileCommunUtil's MacMiniPassword
+                                        -- set my_MacMiniPassword to ProfileCommunUtil's MacMiniPassword
                                         set my_MacMiniPassword to MacMiniPassword
 
                                         -- Bring it to the front to ensure it receives keystrokes
